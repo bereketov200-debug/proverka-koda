@@ -1,0 +1,10 @@
+<h1>Список заданий</h1>
+<ul>
+{% for a in assignments %}
+    <li>
+        {{ a.title }} - {{ a.points }} баллов
+        <a href="{% url 'assign_reviews' a.id %}">Начать проверку</a>
+    </li>
+{% endfor %}
+</ul>
+<a href="{% url 'create_submission' %}">Создать своё решение</a>

@@ -1,0 +1,20 @@
+<h1>Submit Code</h1>
+
+<form method="post">
+  {% csrf_token %}
+
+  <label>Assignment:</label>
+  <select name="assignment">
+    {% for a in assignments %}
+      <option value="{{ a.id }}">{{ a.title }}</option>
+    {% endfor %}
+  </select>
+
+  <br><br>
+
+  <textarea name="code" placeholder="Paste your code"></textarea>
+
+  <br><br>
+
+  <button type="submit">Submit</button>
+</form>

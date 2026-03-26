@@ -1,0 +1,16 @@
+<h1>Мои результаты</h1>
+
+{% for s in submissions %}
+  <h3>{{ s.assignment.title }}</h3>
+
+  <p><b>Итоговая оценка:</b> {{ s.final_grade }}</p>
+
+  <h4>Отзывы:</h4>
+  <ul>
+    {% for r in s.peerreview_set.all %}
+      <li>
+        {{ r.reviewer.username }}: {{ r.comments }} ({{ r.suggested_grade }})
+      </li>
+    {% endfor %}
+  </ul>
+{% endfor %}

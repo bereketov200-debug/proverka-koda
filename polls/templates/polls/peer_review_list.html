@@ -1,0 +1,10 @@
+<h1>Peer Reviews</h1>
+
+<ul>
+  {% for r in reviews %}
+    <li>
+      Reviewer: {{ r.reviewer }} <br>
+      Submission: {{ r.submission.code_content }}
+    </li>
+  {% endfor %}
+</ul>

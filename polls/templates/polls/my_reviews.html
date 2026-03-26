@@ -1,0 +1,23 @@
+<h1>Мои проверки</h1>
+{% for r in reviews %}
+    <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <p><b>Код автора:</b> {{ r.submission.author.username }}</p>
+        <pre>{{ r.submission.code_content }}</pre>
+        <p><b>Комментарии:</b> {{ r.comments }}</p>
+        {% if not r.is_completed %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="review_id" value="{{ r.id }}">
+            <label>Оценка: <input type="number" name="grade" min="0" max="100"></label>
+            <br>
+            <label>Комментарий: <textarea name="comment"></textarea></label>
+            <br>
+            <button type="submit">Сохранить</button>
+        </form>
+        {% else %}
+            <p>Проверка завершена! Оценка: {{ r.suggested_grade }}</p>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>Пока нет проверок.</p>
+{% endfor %}
