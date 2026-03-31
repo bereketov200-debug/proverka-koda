@@ -1,0 +1,57 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Панель преподавателя{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Панель преподавателя</h2>
+        <a href="{% url 'create_assignment' %}" class="btn btn-primary btn-lg">
+            + Создать новое задание
+        </a>
+    </div>
+
+    {% if assignments %}
+        <h4 class="mb-3">Ваши задания</h4>
+        {% for assignment in assignments %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5>{{ assignment.title }}</h5>
+                <p class="text-muted">{{ assignment.description|truncatewords:30 }}</p>
+                
+                <div class="row text-center">
+                    <div class="col">
+                        <strong>Дедлайн сдачи:</strong><br>
+                        <span class="{% if assignment.submission_deadline < now %}text-danger{% else %}text-success{% endif %}">
+                            {{ assignment.submission_deadline|date:"d.m.Y H:i" }}
+                        </span>
+                    </div>
+                    <div class="col">
+                        <strong>Статус:</strong><br>
+                        <span class="badge bg-{% if assignment.status == 'OPEN' %}success{% elif assignment.status == 'REVIEWING' %}warning{% else %}secondary{% endif %}">
+                            {{ assignment.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    {% if assignment.status == 'OPEN' %}
+                        <a href="{% url 'assign_reviews' assignment.id %}" class="btn btn-warning">
+                            Запустить рецензирование
+                        </a>
+                    {% elif assignment.status == 'REVIEWING' %}
+                        <a href="{% url 'assignment_detail' assignment.id %}" class="btn btn-info">
+                            Модерация отзывов и оценки
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            У вас пока нет созданных заданий. Нажмите кнопку выше, чтобы создать первое.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

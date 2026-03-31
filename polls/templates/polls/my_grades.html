@@ -1,0 +1,58 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Мои оценки{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Мои итоговые оценки</h2>
+
+    {% if submissions %}
+        {% for submission in submissions %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ submission.assignment.title }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p><strong>Сдано:</strong> {{ submission.submitted_at|date:"d.m.Y в H:i" }}</p>
+                        
+                        {% if submission.final_grade is not None %}
+                            <div class="alert alert-success d-flex align-items-center">
+                                <h4 class="mb-0 me-3">Оценка: <strong>{{ submission.final_grade }}/100</strong></h4>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                Преподаватель ещё не выставил итоговую оценку.
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 text-end">
+                        <a href="{% url 'my_submissions' %}" class="btn btn-outline-secondary">
+                            Посмотреть код работы
+                        </a>
+                    </div>
+                </div>
+
+                {% if submission.teacher_feedback %}
+                    <hr>
+                    <h6>Комментарий преподавателя:</h6>
+                    <div class="border p-3 bg-light rounded">
+                        {{ submission.teacher_feedback }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            Вы ещё не сдали ни одной работы. Оценки появятся после проверки преподавателя.
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'student_dashboard' %}" class="btn btn-secondary">← Вернуться в дашборд</a>
+    </div>
+</div>
+{% endblock %}

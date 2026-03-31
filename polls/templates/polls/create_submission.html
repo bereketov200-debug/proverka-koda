@@ -1,20 +1,40 @@
-<h1>Submit Code</h1>
+{% extends 'polls/base.html' %}
 
-<form method="post">
-  {% csrf_token %}
+{% block title %}Сдать работу{% endblock %}
 
-  <label>Assignment:</label>
-  <select name="assignment">
-    {% for a in assignments %}
-      <option value="{{ a.id }}">{{ a.title }}</option>
-    {% endfor %}
-  </select>
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4>Сдать работу</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Выберите задание</label>
+                        <select name="assignment" class="form-select" required>
+                            <option value="">— Выберите задание —</option>
+                            {% for assignment in assignments %}
+                            <option value="{{ assignment.id }}">{{ assignment.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-  <br><br>
+                    <div class="mb-3">
+                        <label class="form-label">Ваш код</label>
+                        <textarea name="code" class="form-control" rows="15" placeholder="Вставьте сюда ваш код..." required></textarea>
+                    </div>
 
-  <textarea name="code" placeholder="Paste your code"></textarea>
-
-  <br><br>
-
-  <button type="submit">Submit</button>
-</form>
+                    <button type="submit" class="btn btn-success w-100">Сдать работу</button>
+                </form>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'student_dashboard' %}" class="btn btn-secondary">Вернуться в дашборд</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

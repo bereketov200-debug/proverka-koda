@@ -1,0 +1,58 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Панель студента{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Добро пожаловать, {{ user.username }}!</h2>
+
+    <div class="row">
+        <!-- Карточка "Активные задания" -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Активные задания</h5>
+                </div>
+                <div class="card-body">
+                    {% if assignments %}
+                        {% for assignment in assignments %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <h6>{{ assignment.title }}</h6>
+                            <p class="text-muted small">
+                                Дедлайн сдачи: 
+                                <span class="{% if assignment.submission_deadline < now %}text-danger{% else %}text-success{% endif %}">
+                                    {{ assignment.submission_deadline|date:"d.m.Y H:i" }}
+                                </span>
+                            </p>
+                            <a href="{% url 'create_submission' %}" class="btn btn-sm btn-primary">Сдать работу</a>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Пока нет активных заданий.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Карточка действий студента -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Мои действия</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'my_reviews' %}" class="btn btn-lg btn-success w-100 mb-3">
+                        Оценить работы других студентов
+                    </a>
+                    <a href="{% url 'my_submissions' %}" class="btn btn-lg btn-outline-primary w-100 mb-3">
+                        Мои сданные работы
+                    </a>
+                    <a href="{% url 'my_grades' %}" class="btn btn-lg btn-outline-success w-100">
+                        Мои оценки
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

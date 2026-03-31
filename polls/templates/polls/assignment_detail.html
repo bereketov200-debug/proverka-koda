@@ -1,0 +1,87 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}{{ assignment.title }} — Модерация{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">{{ assignment.title }}</h2>
+    <p class="lead">{{ assignment.description }}</p>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Сданные работы и отзывы</h4>
+        <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">← Назад в панель</a>
+    </div>
+
+    {% for submission in submissions %}
+    <div class="card shadow mb-5">
+        <div class="card-header bg-dark text-white">
+            <strong>Студент: {{ submission.author.username }}</strong>
+            <span class="badge bg-light text-dark float-end">Сдано: {{ submission.submitted_at|date:"d.m.Y H:i" }}</span>
+        </div>
+        
+        <div class="card-body">
+            <!-- Код работы -->
+            <h6>Код работы:</h6>
+            <pre class="bg-light p-3 border rounded mb-4">{{ submission.code_content }}</pre>
+
+            <!-- Отзывы от студентов (анонимно для препода не нужно, но показываем автора отзыва) -->
+            <h6 class="mb-3">Отзывы от студентов:</h6>
+            {% for review in submission.peerreview_set.all %}
+                <div class="border p-3 mb-3 rounded">
+                    <div class="d-flex justify-content-between">
+                        <strong>От {{ review.reviewer.username }} — Оценка: {{ review.suggested_grade|default:"—" }}/100</strong>
+                        {% if review.is_approved_by_teacher %}
+                            <span class="badge bg-success">Одобрено</span>
+                        {% elif review.is_discarded %}
+                            <span class="badge bg-danger">Отклонено</span>
+                        {% else %}
+                            <span class="badge bg-warning">На модерации</span>
+                        {% endif %}
+                    </div>
+                    <p class="mt-2">{{ review.comments|default:"Комментарий отсутствует" }}</p>
+
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="review_id" value="{{ review.id }}">
+                        <button type="submit" name="approve" class="btn btn-sm btn-success">Одобрить</button>
+                        <button type="submit" name="discard" class="btn btn-sm btn-danger">Отклонить</button>
+                    </form>
+                </div>
+            {% empty %}
+                <p class="text-muted">Пока нет отзывов по этой работе.</p>
+            {% endfor %}
+
+            <!-- Форма итоговой оценки от преподавателя -->
+            <hr class="my-4">
+            <h6>Выставить итоговую оценку</h6>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="submission_id" value="{{ submission.id }}">
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Итоговая оценка (0–100)</label>
+                        <input type="number" name="final_grade" 
+                               class="form-control" 
+                               min="0" max="100" step="0.1"
+                               value="{{ submission.final_grade|default:'' }}" 
+                               required>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Комментарий преподавателя (виден студенту)</label>
+                        <textarea name="teacher_feedback" class="form-control" rows="3">{{ submission.teacher_feedback|default:'' }}</textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Сохранить оценку</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not submissions %}
+        <div class="alert alert-info">
+            По этому заданию ещё никто не сдал работу.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

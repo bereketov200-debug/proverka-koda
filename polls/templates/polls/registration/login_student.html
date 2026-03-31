@@ -1,0 +1,26 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Вход — Студент{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h4>Вход для студентов</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Войти</button>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                Нет аккаунта? <a href="{% url 'register_student' %}">Регистрация студента</a><br>
+                <a href="{% url 'login_teacher' %}">Я преподаватель</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

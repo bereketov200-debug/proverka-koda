@@ -1,0 +1,46 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Мои сданные работы{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Мои сданные работы</h2>
+
+    {% if submissions %}
+        {% for submission in submissions %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <strong>{{ submission.assignment.title }}</strong>
+            </div>
+            <div class="card-body">
+                <p><strong>Сдано:</strong> {{ submission.submitted_at|date:"d.m.Y в H:i" }}</p>
+                
+                <div class="mb-3">
+                    <strong>Код работы:</strong>
+                    <pre class="bg-light p-3 border rounded">{{ submission.code_content }}</pre>
+                </div>
+
+                {% if submission.final_grade is not None %}
+                    <div class="alert alert-success">
+                        <h5>Итоговая оценка: <strong>{{ submission.final_grade }}/100</strong></h5>
+                        {% if submission.teacher_feedback %}
+                            <p><strong>Комментарий преподавателя:</strong> {{ submission.teacher_feedback }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        Преподаватель ещё не выставил оценку.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            Вы ещё не сдали ни одной работы.
+        </div>
+    {% endif %}
+
+    <a href="{% url 'student_dashboard' %}" class="btn btn-secondary">← Вернуться в дашборд</a>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Мои полученные отзывы{% endblock %}
+
+{% block content %}
+<h2>Отзывы на мои работы</h2>
+
+{% if reviews %}
+    {% for review in reviews %}
+    <div class="card mb-3">
+        <div class="card-header">
+            Задание: <strong>{{ review.submission.assignment.title }}</strong>
+        </div>
+        <div class="card-body">
+            <p><strong>Оценка:</strong> {{ review.suggested_grade|default:"—" }}/100</p>
+            <p><strong>Отзыв:</strong> {{ review.comments|default:"Без комментария" }}</p>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info">
+        Пока нет одобренных отзывов на ваши работы.
+    </div>
+{% endif %}
+
+<a href="{% url 'student_dashboard' %}" class="btn btn-secondary">Вернуться в дашборд</a>
+{% endblock %}
