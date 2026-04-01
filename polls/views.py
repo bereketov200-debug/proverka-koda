@@ -8,6 +8,7 @@ from .models import Assignment, Submission, PeerReview
 from django import forms
 import random
 from django.utils import timezone
+from collections import defaultdict
 
 
 def is_instructor(user):
@@ -72,8 +73,7 @@ def register_teacher(request):
 def student_dashboard(request):
     assignments = Assignment.objects.filter(status='OPEN')
     return render(request, 'polls/dashboard/student_dashboard.html', {
-        'assignments': assignments,
-        'is_instructor': False
+        'assignments': assignments
     })
 
 
@@ -82,8 +82,7 @@ def student_dashboard(request):
 def teacher_dashboard(request):
     assignments = Assignment.objects.filter(created_by=request.user)
     return render(request, 'polls/dashboard/teacher_dashboard.html', {
-        'assignments': assignments,
-        'is_instructor': True
+        'assignments': assignments
     })
 
 
@@ -210,26 +209,11 @@ def my_received_reviews(request):
     my_submissions = Submission.objects.filter(author=request.user)
     reviews = PeerReview.objects.filter(
         submission__in=my_submissions,
-        is_approved_by_teacher=True
-    ).select_related('submission', 'reviewer', 'submission__assignment')
+        is_approved_by_teacher=True,
+        is_discarded=False
+    ).select_related('submission', 'submission__assignment')
     
     return render(request, 'polls/my_received_reviews.html', {'reviews': reviews})
-
-
-@login_required
-def my_submissions(request):
-    submissions = Submission.objects.filter(author=request.user).select_related('assignment')
-    return render(request, 'polls/my_submissions.html', {
-        'submissions': submissions
-    })
-
-
-@login_required
-def my_grades(request):
-    submissions = Submission.objects.filter(author=request.user).select_related('assignment')
-    return render(request, 'polls/my_grades.html', {
-        'submissions': submissions
-    })
 
 
 @login_required
@@ -239,33 +223,38 @@ def assignment_detail(request, assignment_id):
     submissions = Submission.objects.filter(assignment=assignment).select_related('author')
 
     if request.method == 'POST':
-        review_id = request.POST.get('review_id')
-        
-        if review_id:
-            review = PeerReview.objects.get(id=review_id)
-            if 'approve' in request.POST:
+        # Модерация отзывов
+        if 'review_id' in request.POST and 'action' in request.POST:
+            review = get_object_or_404(PeerReview, id=request.POST['review_id'])
+            action = request.POST['action']
+
+            if action == 'approve':
                 review.is_approved_by_teacher = True
                 review.is_discarded = False
                 messages.success(request, 'Отзыв одобрен.')
-            elif 'discard' in request.POST:
+            elif action == 'discard':
                 review.is_approved_by_teacher = False
                 review.is_discarded = True
                 messages.success(request, 'Отзыв отклонён.')
-            review.save()
 
-        if 'final_grade' in request.POST:
-            submission_id = request.POST.get('submission_id')
+            review.save()
+            return redirect('assignment_detail', assignment_id=assignment.id)
+
+        # Сохранение итоговой оценки
+        if 'submission_id' in request.POST:
+            submission = get_object_or_404(Submission, id=request.POST['submission_id'])
             final_grade = request.POST.get('final_grade')
             teacher_feedback = request.POST.get('teacher_feedback', '')
 
-            if submission_id and final_grade:
-                submission = Submission.objects.get(id=submission_id)
-                submission.final_grade = final_grade
-                submission.teacher_feedback = teacher_feedback
-                submission.save()
-                messages.success(request, 'Итоговая оценка сохранена.')
-
-        return redirect('assignment_detail', assignment_id=assignment.id)
+            if final_grade:
+                try:
+                    submission.final_grade = float(final_grade)
+                except ValueError:
+                    pass
+            submission.teacher_feedback = teacher_feedback
+            submission.save()
+            messages.success(request, 'Итоговая оценка сохранена.')
+            return redirect('assignment_detail', assignment_id=assignment.id)
 
     return render(request, 'polls/assignment_detail.html', {
         'assignment': assignment,
@@ -274,8 +263,49 @@ def assignment_detail(request, assignment_id):
 
 
 @login_required
+@user_passes_test(is_instructor, login_url='login_teacher')
+def gradebook(request):
+    assignments = Assignment.objects.filter(created_by=request.user)
+
+    submissions = Submission.objects.filter(
+        assignment__created_by=request.user
+    ).select_related('author', 'assignment').order_by('author__username', 'assignment__title')
+
+    student_grades = defaultdict(list)
+
+    for sub in submissions:
+        student_grades[sub.author].append({
+            'assignment': sub.assignment,
+            'final_grade': sub.final_grade,
+            'teacher_feedback': sub.teacher_feedback,
+            'submitted_at': sub.submitted_at
+        })
+
+    context = {
+        'student_grades': dict(student_grades),
+        'assignments': assignments,
+    }
+    
+    return render(request, 'polls/gradebook.html', context)
+
+
+@login_required
 def home_redirect(request):
     if request.user.groups.filter(name='Instructor').exists():
         return redirect('teacher_dashboard')
     else:
         return redirect('student_dashboard')
+    
+@login_required
+def my_submissions(request):
+    submissions = Submission.objects.filter(author=request.user).select_related('assignment')
+    return render(request, 'polls/my_submissions.html', {
+        'submissions': submissions
+    })
+
+@login_required
+def my_grades(request):
+    submissions = Submission.objects.filter(author=request.user).select_related('assignment')
+    return render(request, 'polls/my_grades.html', {
+        'submissions': submissions
+    })

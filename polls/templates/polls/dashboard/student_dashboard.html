@@ -41,12 +41,18 @@
                     <h5 class="mb-0">Мои действия</h5>
                 </div>
                 <div class="card-body">
-                    <a href="{% url 'my_reviews' %}" class="btn btn-lg btn-success w-100 mb-3">
+                    <a href="{% url 'my_reviews' %}" class="btn btn-lg btn-warning w-100 mb-3">
                         Оценить работы других студентов
                     </a>
+                    
+                    <a href="{% url 'my_received_reviews' %}" class="btn btn-lg btn-success w-100 mb-3">
+                        📬 Посмотреть отзывы на мои работы
+                    </a>
+
                     <a href="{% url 'my_submissions' %}" class="btn btn-lg btn-outline-primary w-100 mb-3">
                         Мои сданные работы
                     </a>
+
                     <a href="{% url 'my_grades' %}" class="btn btn-lg btn-outline-success w-100">
                         Мои оценки
                     </a>

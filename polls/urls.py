@@ -25,4 +25,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     
     path('', views.home_redirect, name='home'),
+    path('gradebook/', views.gradebook, name='gradebook'),
+    path('gradebook/', views.gradebook, name='gradebook'),
+    path('my-received-reviews/', views.my_received_reviews, name='my_received_reviews'),
 ]

@@ -3,25 +3,40 @@
 {% block title %}Мои полученные отзывы{% endblock %}
 
 {% block content %}
-<h2>Отзывы на мои работы</h2>
+<div class="container">
+    <h2>Отзывы на мои работы</h2>
 
-{% if reviews %}
-    {% for review in reviews %}
-    <div class="card mb-3">
-        <div class="card-header">
-            Задание: <strong>{{ review.submission.assignment.title }}</strong>
+    {% if reviews %}
+        {% for review in reviews %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <strong>Задание:</strong> {{ review.submission.assignment.title }}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5>Отзыв коллеги</h5>
+                        <p class="border-start border-4 border-primary ps-3">
+                            {{ review.comments|linebreaks }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <h5 class="text-success">Оценка: {{ review.suggested_grade|floatformat:1 }}</h5>
+                        <small class="text-muted">
+                            Сдано: {{ review.submission.submitted_at|date:"d.m.Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <p><strong>Оценка:</strong> {{ review.suggested_grade|default:"—" }}/100</p>
-            <p><strong>Отзыв:</strong> {{ review.comments|default:"Без комментария" }}</p>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <h5>Пока нет одобренных отзывов на ваши работы</h5>
+            <p class="text-muted">Отзывы станут видны после того, как преподаватель их одобрит.</p>
         </div>
-    </div>
-    {% endfor %}
-{% else %}
-    <div class="alert alert-info">
-        Пока нет одобренных отзывов на ваши работы.
-    </div>
-{% endif %}
+    {% endif %}
 
-<a href="{% url 'student_dashboard' %}" class="btn btn-secondary">Вернуться в дашборд</a>
+    <a href="{% url 'student_dashboard' %}" class="btn btn-secondary">← Назад в дашборд</a>
+</div>
 {% endblock %}

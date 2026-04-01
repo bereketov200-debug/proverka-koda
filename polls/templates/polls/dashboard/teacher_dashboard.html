@@ -6,9 +6,14 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Панель преподавателя</h2>
-        <a href="{% url 'create_assignment' %}" class="btn btn-primary btn-lg">
-            + Создать новое задание
-        </a>
+        <div>
+            <a href="{% url 'create_assignment' %}" class="btn btn-primary btn-lg me-2">
+                + Создать новое задание
+            </a>
+            <a href="{% url 'gradebook' %}" class="btn btn-info btn-lg">
+                📊 Табель оценок
+            </a>
+        </div>
     </div>
 
     {% if assignments %}
